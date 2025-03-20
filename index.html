@@ -25,7 +25,7 @@
         .form-elem { display: flex; gap: 2vw; align-items: center; }
         .form-elem:nth-child(3) { margin-right: 6.95vw; }
         input { font-size: 1.2vw; padding-left: 0.5vw; height: 2vw; }
-        .btnHandler {display: flex; justify-content: center;}
+        .btnHandler {display: flex; flex-direction: column; justify-content: center; align-items: center;}
         button {
             width: 10vw; height: 2vw; font-size: 1vw; margin-top: 2vw;
             cursor: pointer; background-color: rgb(33, 156, 177); border: none; font-weight: 700; color: #FFFFFF; border-radius: 10px;
@@ -35,7 +35,7 @@
         .noMatchMsg {color: rgb(13, 84, 97);}
         .not-match-button {
             width: 20vw; background-color: coral; color: #fff; position: absolute;
-            bottom: 4vw; left: calc(50% - 10vw); display: none; margin-top: -2vw;
+            bottom: 10vw; left: calc(50% - 10vw); display: none; 
         }
         .not-match-button:hover { background-color: rgb(248, 102, 49); }
         .btn-visible { display: block; }
@@ -399,7 +399,6 @@
         const spinner = document.createElement("div");
         spinner.classList.add("spinnerProcess");
         loading.appendChild(spinner);
-        // loading.innerHTML = "<h2>ИДЁТ ОБРАБОТКА ДАННЫХ...</h2>";
 
         try {
             let [dataArrFirstFile, dataArrSecondFile] = await Promise.all([
@@ -407,18 +406,19 @@
                 readExcelFile(inputSFSearchRepeat.files[0])
             ]);
 
+
             let header = dataArrFirstFile[0]; // Заголовки
-            let resultArr = [header];
-            let notMatchArr = [dataArrSecondFile[0]]; // Заголовки для несовпавших данных
+            let resultArr = [];
+            let notMatchArr = []; // Заголовки для несовпавших данных
             let repeatQtt = 0;
 
             // Создаём Set из всех значений первого файла для быстрого поиска
             let firstFileSet = new Set(dataArrFirstFile.slice(1).map(row => row[1]));
 
             console.log("🔎 Начинаем сравнение...");
-            for (let i = 1; i < dataArrFirstFile.length; i++) {
+            for (let i = 0; i < dataArrFirstFile.length; i++) {
                 let row1 = dataArrFirstFile[i];
-                let matchRow = dataArrSecondFile.find(row2 => row2[0] === row1[1]);
+                let matchRow = dataArrSecondFile.find(row2 => row2[0] === row1[0]);
 
                 if (matchRow) {
                     row1.push("REPEAT-->");
@@ -447,7 +447,7 @@
             );
             XLSX.writeFile(workbook, `${fileName}.xlsx`);
             console.log(`📂 Файл ${fileName}.xlsx сохранен.`);
-            loading.remove(spinner);
+            // loading.remove(spinner);
             loading.innerHTML = `<p class="noMatchMsg">Совпадений найдено: <span style="color:red; font-weight:700;">${repeatQtt}</span></p>`;
 
             if (notMatchArr.length > 1) { // Если есть хоть одна несовпавшая строка
