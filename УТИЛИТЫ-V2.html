@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Утилиты</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="https://firebasestorage.googleapis.com/v0/b/bookscrap2024.appspot.com/o/uploaded%2Ffavicon-16x16.jpg?alt=media&token=c64ce178-c860-4688-a510-77289b0cb258">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; font-size: 1vw; display: flex; flex-direction: column; position: relative; min-height: 100vh;}
+        .panel {
+            width: 90%; margin: 0 auto; min-height: 85vh; background-color: rgb(220, 249, 254);
+            border-radius: 0 0 10px 10px; display: flex; flex-direction: column;
+            padding: 2vw; gap: 1vw; align-items: center; justify-content: center;
+            display: none; 
+        }
+        h2 {color: rgb(13, 84, 97); margin-bottom: 2vw;}
+        h2, p {text-align: center; }
+        p {margin-top: 1vw; text-transform: uppercase;}
+        p span {color: rgb(13, 84, 97); font-weight: 700;}
+        .form-inner { width: 80%; display: flex; flex-direction: column; align-items: flex-end; padding-top: 3vw; }
+        .form-elem { display: flex; gap: 2vw; align-items: center; }
+        .form-elem:nth-child(3) { margin-right: 6.95vw; }
+        input { font-size: 1.2vw; padding-left: 0.5vw; height: 2vw; }
+        .btnHandler {display: flex; justify-content: center;}
+        button {
+            width: 10vw; height: 2vw; font-size: 1vw; margin-top: 2vw;
+            cursor: pointer; background-color: rgb(33, 156, 177); border: none; font-weight: 700; color: #FFFFFF; border-radius: 10px;
+        }
+        button:hover { background-color: rgb(13, 84, 97); }
+        .loading { width: 100%; height: 8vw; display: flex; justify-content: center; align-items: center; color: darkorange; }
+        .noMatchMsg {color: rgb(13, 84, 97);}
+        .not-match-button {
+            width: 20vw; background-color: coral; color: #fff; position: absolute;
+            bottom: 4vw; left: calc(50% - 10vw); display: none; margin-top: -2vw;
+        }
+        .not-match-button:hover { background-color: rgb(248, 102, 49); }
+        .btn-visible { display: block; }
+        .navigationWrapper {
+            width: 100%;
+            padding: 0.5vw 5% 0 5%;
+            display: flex;
+            align-items: flex-end;
+            gap: 2vw;
+            font-size: 1vw;
+            height: 3vw;
+        }
+
+        .navBtn {
+            padding: 0;
+            margin: 0;
+            text-transform: uppercase;
+            background-color: rgb(220, 249, 254);
+            font-size: 0.8vw;
+            width: 100%;
+            border-radius: 10px 10px 0 0;
+            color: black;
+        }
+
+        .navBtn:hover {
+            background-color: rgb(191, 236, 244);
+        }
+
+        .navBtn i {
+            color: rgb(33, 156, 177);
+            margin-left: 0.3vw;
+        }
+
+        .visible {
+            display: block !important;
+        } 
+
+        .unVisible {
+            display: none;
+        }
+
+        .load {
+            position: relative;
+        }
+
+        .imp {
+            color: coral;
+        }
+
+        .footer {
+            width: 10vw;
+            position: absolute;
+            bottom: 0;
+            left: calc(50% - 5vw);
+            background-color: rgb(33, 156, 177);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 1.3vw;
+            color: #fff;
+            border-radius: 5px 5px 0 0;
+        }
+
+        .under {
+            z-index: -1;
+            display: block;
+            position: absolute;
+            left: 5%;
+            top: 3vw;
+        }
+
+        /* Об. повторов вертикально */
+        .form-inner-vert{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-top: 3vw;
+        }
+
+        .form-inner-vert-inner {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
+        }
+
+         /* Об. повторов вертикально - выборочно*/
+
+        .colSum {
+            width: 4vw;
+        }
+
+        .form-inner-vert-inner.form-inner-vert-c {
+            gap: 1vw;
+        }
+
+        /* Анализ ctr*/
+
+        .form-elem.form-elem-flex {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
+            gap: 0;
+        }
+
+        .form-elem-bottom p{
+            margin-top: 0;
+        }
+
+        .form-elem-ctr {
+            margin-top: 1.5vw;
+        }
+
+        .form-elem-flex input {
+            height: 1.4vw;
+            font-size: 0.9vw;
+        }
+
+        .form-elem-bottom p {
+            font-size: 0.8vw;
+            margin-top: 0.3vw;
+        }
+
+
+        /* Спиннер (по умолчанию скрыт) */
+        .spinner {
+            position: absolute;
+            top: calc(50% - 25px);
+            left: calc(50% - 25px);
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255);
+            border-top-color: rgb(33, 156, 177);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .spinnerProcess {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255);
+            border-top-color: rgb(33, 156, 177);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        /* Анимация вращения */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+    
+    </style>
+</head>
+<body>
+    <div class="navigationWrapper">
+        <Button class="navBtn" id="repeatUtlBtn">Поиск повторов  <i class="fa-solid fa-magnifying-glass"></i></Button>
+        <Button class="navBtn" id="mergeVertUtl">Объединение повторов (В)  <i class="fa-solid fa-arrows-up-down"></i></Button>
+        <Button class="navBtn" id="mergeHorUtlBtn">Объединение повторов (ВВ)  <i class="fa-solid fa-arrow-down-up-lock"></i></i></Button>     
+        <Button class="navBtn" id="ctrAsnalyticsBtn">Анализ CTR  <i class="fa-solid fa-chart-line"></i></Button>
+    </div>
+    <form class="findRepeat panel ">
+        <h2>- ПОИСК ПОВТОРОВ В ФАЙЛАХ EXCEL -</h2>
+        <p class="instructions">
+            Сравниваемые значения должны находится во <span class="imp">втором(B)</span> столбце
+            каждого из файлов
+          </p>
+          <p class="instructions">
+            Повторяющиеся позиции будут отображены в первом файле - в столбцах после <span class="imp">"REPEAT-->"</span>
+          </p>
+        <div class="form-inner">
+            <div class="form-elem">
+                <label>ФАЙЛ С РЕЗУЛЬТАТОМ:</label>
+                <input type="file" id="inputFirstFile">
+            </div>
+            <div class="form-elem">
+                <label>ФАЙЛ СРАВНЕНИЯ:</label>
+                <input type="file" id="inputSecFile">
+            </div>
+            <div class="form-elem">
+                <label>ИМЯ ФАЙЛА (РЕЗУЛЬТАТ):</label>
+                <input type="text" id="fileName" placeholder="Пример: книги">
+            </div>
+        </div>
+        <div class="btnHandler">
+            <button type="button" class="load-button">ЗАГРУЗИТЬ</button>
+            <button type="button" class="not-match-button">СКАЧАТЬ НЕСОВПАДЕНИЯ</button>
+        </div>
+        <div class="loading"></div>
+    </form>
+    <form class="mergeVertical panel">
+        <h2>- ОБЪЕДИНЕНИЕ ПОВТОРОВ (ВЕРТИКАЛЬНО) -</h2>
+        <p class="instructions">ПРОГРАММА СРАВНИВАЕТ ПО <span class="imp">ПЕРВОМУ</span> СТОЛБЦУ И СУММИРУЕТ ДАННЫЕ С <span class="imp">2-ГО</span> СТОЛБЦА</p>
+        <p class="instructions">ВАЖНО! ДАННЫЕ ДОЛЖНЫ НАХОДИТСЯ С <span class="imp">ВТОРОЙ</span> СТРОКИ (ПЕРВАЯ СТРОКА ПУСТАЯ)</p>
+        <div class="form-inner-vert">
+            <div class="form-inner-vert-inner">
+                <div class="form-elem">
+                    <label for="inputFileMergeVert">ФАЙЛ ДЛЯ ОБРОБОТКИ: </label>
+                    <input type="file" id="inputFileMergeVert" />
+                </div>
+                <div class="form-elem">
+                    <label for="fileNameMergeVert">ИМЯ ФАЙЛА - РЕЗУЛЬТАТ: </label>
+                    <input type="text" id="fileNameMergeVert" placeholder="ПРИМЕР: книги" />
+                </div>
+            </div>
+            <button type="button" class="load-button-merge-vert">ЗАГРУЗИТЬ</button>
+        </div>
+        <div class="loadingMergeVert"></div>
+    </form>
+    <form class="mergeVertOption panel">
+        <h2>- ОБЪЕДИНЕНИЕ ПОВТОРОВ (ВЕРТИКАЛЬНО) - ВЫБРАННЫЕ ЯЧЕЙКИ -</h2>
+        <p class="instructions">ПРОГРАММА СРАВНИВАЕТ ПО <span class="imp">ПЕРВОМУ</span> СТОЛБЦУ</p>
+        <div class="form-inner-vert">
+            <div class="form-inner-vert-inner form-inner-vert-c">
+                <div class="form-elem">
+                    <label for="inputFileMergeVertC">ФАЙЛ ДЛЯ ОБРОБОТКИ: </label>
+                    <input type="file" id="inputFileMergeVertC" />
+                </div>
+                <div class="form-elem">
+                    <label for="inputSecFile"
+                        >С КАКОГО СТОЛБЦА СУММИРОВАТЬ (МИН. - 2):
+                    </label>
+                    <input class="colSum" min="2" type="number" id="inputColSum" />
+                    <label for="inputSecFile">ПО КАКОЙ СТОЛБЕЦ (ВКЛ.): </label>
+                    <input class="colSum" min="2" type="number" id="inputColSumEnd" />
+                </div>
+                <div class="form-elem">
+                    <label for="fileName">ИМЯ ФАЙЛА - РЕЗУЛЬТАТ: </label>
+                    <input type="text" id="fileNameMergeVertC" placeholder="ПРИМЕР: книги" />
+                </div>
+            </div>
+            <button type="button" class="load-button-merge-vert-c">ЗАГРУЗИТЬ</button>
+        </div>
+        
+        <div class="loadingMergeVertC"></div>
+    </form>
+    <form class="ctrAsnalytics panel">
+        <h2>- АНАЛИЗ КЛЮЧЕВЫХ ФРАЗ ПO CTR (WILDBERRIES) -</h2>
+        <p class="instructions">
+            Программа объединяет ключевые запросы, находящиеся в <span class="imp">первом</span> столбце, и суммирует показатели
+        </p>
+        <div class="form-inner-vert">
+            <div class="form-inner-vert-inner">
+                <div class="form-elem">
+                    <label for="inputFileCtrA">ФАЙЛ ДЛЯ ОБРАБОТКИ: </label>
+                    <input type="file" id="inputFileCtrA" />
+                </div>
+                <div class="form-elem form-elem-ctr form-elem-flex">
+                    <div class="form-elem-top">
+                        <label for="inputColSum">ГРАНИЦА МИНИМАЛЬНОГО CTR:</label>
+                        <input class="colSum" type="number" id="inputColSumCtr" />
+                        <label for="inputColSumEnd">ГРАНИЦА ПОЛОЖИТЕЛЬНОГО CTR: </label>
+                        <input class="colSum" type="number" id="inputColSumCtrEnd" />
+                    </div>
+                    <div class="form-elem-bottom">
+                        <p><span class="imp">*</span> Не обязательно к заполнению, минимальное значение - 0</p>
+                    </div>
+                </div>
+                <div class="form-elem form-elem-ctr">
+                    <label for="fileNameCtr">ИМЯ ФАЙЛА - РЕЗУЛЬТАТ: </label>
+                    <input type="text" id="fileNameCtr" placeholder="ПРИМЕР: книги" />
+                </div>
+            </div>
+            <button type="button" class="load-button-ctr">ЗАГРУЗИТЬ</button>
+        </div>
+    </form>
+    <form class="load panel visible"></form>
+    <form class="panel under"></form>
+    <div class="footer">Утилиты V1.0</div>
+<script>
+    const inputFFSearchRepeat = document.getElementById("inputFirstFile");
+    const inputSFSearchRepeat = document.getElementById("inputSecFile");
+    const loadBtnSearchRepeat = document.querySelector(".load-button");
+    const noMatchBtn = document.querySelector(".not-match-button");
+    const loading = document.querySelector(".loading");
+    const fileNameInput = document.querySelector("#fileName");
+    const handleBtnsWrapper = document.querySelector(".navigationWrapper");
+
+    handleBtnsWrapper.addEventListener("click", (event) => {
+        const searchRepeatPanel = document.querySelector(".findRepeat");
+        const mergeVerticalPanel = document.querySelector(".mergeVertical");
+        const mergeVertOptionPanel = document.querySelector(".mergeVertOption");
+        const ctrAsnalyticsPanel = document.querySelector(".ctrAsnalytics");
+        const panels = [searchRepeatPanel, mergeVerticalPanel, mergeVertOptionPanel, ctrAsnalyticsPanel];
+        panels.forEach((panel) => {
+            panel.classList.remove("visible");
+        });
+        const loadPanel = document.querySelector(".load");
+        loadPanel.classList.add("visible");
+        const spinner = document.createElement("div");
+        spinner.classList.add("spinner");
+        loadPanel.appendChild(spinner);
+
+        setTimeout(() => {
+            loadPanel.classList.remove("visible");
+            spinner.remove();
+            sessionStorage.setItem("lastClicked", event.target.id);
+            location.reload();
+        }, 500);
+    });
+
+    window.addEventListener("load", function() {
+        let lastClicked = sessionStorage.getItem("lastClicked");
+        const loadPanel = document.querySelector(".load");
+        const searchRepeatPanel = document.querySelector(".findRepeat");
+        const mergeVerticalPanel = document.querySelector(".mergeVertical");
+        const mergeVertOptionPanel = document.querySelector(".mergeVertOption");
+        const ctrAsnalyticsPanel = document.querySelector(".ctrAsnalytics");
+        if (lastClicked) {
+            const panels = [searchRepeatPanel, mergeVerticalPanel, mergeVertOptionPanel, ctrAsnalyticsPanel];
+            panels.forEach((panel) => {
+                panel.classList.remove("visible");
+            });
+            loadPanel.classList.remove("visible");
+            if (lastClicked === "repeatUtlBtn") {
+                searchRepeatPanel.classList.add("visible");
+            } else if (lastClicked === "mergeVertUtl") {
+                mergeVerticalPanel.classList.add("visible");
+            } else if (lastClicked === "mergeHorUtlBtn") {
+                mergeVertOptionPanel.classList.add("visible");
+            } else if (lastClicked === "ctrAsnalyticsBtn") {
+                ctrAsnalyticsPanel.classList.add("visible");
+            }
+            sessionStorage.removeItem("lastClicked"); // Чистим, чтобы не сохранялось навсегда
+        } else {
+            searchRepeatPanel.classList.add("visible");
+            loadPanel.classList.remove("visible");
+        }
+    });
+
+    function readExcelFile(file) {
+        return new Promise((resolve, reject) => {
+            console.log(`📂 Читаем файл: ${file.name}`);
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                const data = new Uint8Array(event.target.result);
+                const workbook = XLSX.read(data, { type: "array" });
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+                const parsedData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                console.log(`✅ Файл ${file.name} загружен. Кол-во строк: ${parsedData.length}`);
+                resolve(parsedData);
+            };
+            reader.onerror = (error) => reject(error);
+            reader.readAsArrayBuffer(file);
+        });
+    }
+
+    async function processFiles() {
+        const fileName = fileNameInput.value.trim();
+        if (!fileName) return;
+
+        console.log("🚀 Начинаем обработку...");
+        const spinner = document.createElement("div");
+        spinner.classList.add("spinnerProcess");
+        loading.appendChild(spinner);
+        // loading.innerHTML = "<h2>ИДЁТ ОБРАБОТКА ДАННЫХ...</h2>";
+
+        try {
+            let [dataArrFirstFile, dataArrSecondFile] = await Promise.all([
+                readExcelFile(inputFFSearchRepeat.files[0]),
+                readExcelFile(inputSFSearchRepeat.files[0])
+            ]);
+
+            let header = dataArrFirstFile[0]; // Заголовки
+            let resultArr = [header];
+            let notMatchArr = [dataArrSecondFile[0]]; // Заголовки для несовпавших данных
+            let repeatQtt = 0;
+
+            // Создаём Set из всех значений первого файла для быстрого поиска
+            let firstFileSet = new Set(dataArrFirstFile.slice(1).map(row => row[1]));
+
+            console.log("🔎 Начинаем сравнение...");
+            for (let i = 1; i < dataArrFirstFile.length; i++) {
+                let row1 = dataArrFirstFile[i];
+                let matchRow = dataArrSecondFile.find(row2 => row2[0] === row1[1]);
+
+                if (matchRow) {
+                    row1.push("REPEAT-->");
+                    row1.push(...matchRow);
+                    repeatQtt++;
+                }
+                resultArr.push(row1);
+            }
+
+            // Находим элементы, которых нет в первом файле
+            for (let i = 1; i < dataArrSecondFile.length; i++) {
+                let row2 = dataArrSecondFile[i];
+                if (!firstFileSet.has(row2[0])) {
+                    notMatchArr.push(row2);
+                }
+            }
+
+            // console.log("Несовпавшие элементы:", notMatchArr);
+            console.log(`✅ Сравнение завершено. Найдено совпадений: ${repeatQtt}`);
+
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(
+                workbook,
+                XLSX.utils.aoa_to_sheet(resultArr),
+                "Results"
+            );
+            XLSX.writeFile(workbook, `${fileName}.xlsx`);
+            console.log(`📂 Файл ${fileName}.xlsx сохранен.`);
+            loading.remove(spinner);
+            loading.innerHTML = `<p class="noMatchMsg">Совпадений найдено: <span style="color:red; font-weight:700;">${repeatQtt}</span></p>`;
+
+            if (notMatchArr.length > 1) { // Если есть хоть одна несовпавшая строка
+                noMatchBtn.style.display = "block";
+                noMatchBtn.onclick = () => {
+                    console.log(`📂 Сохраняем файл с несовпадениями...`);
+                    const noMatchWorkbook = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(
+                        noMatchWorkbook,
+                        XLSX.utils.aoa_to_sheet(notMatchArr),
+                        "No Matches"
+                    );
+                    XLSX.writeFile(noMatchWorkbook, "noMatch.xlsx");
+                    console.log(`✅ Файл noMatch.xlsx сохранен.`);
+                };
+            }
+
+            fileNameInput.value = "";
+            inputFFSearchRepeat.value = "";
+            inputSFSearchRepeat.value = "";
+
+        } catch (error) {
+            console.error("❌ Ошибка обработки:", error);
+            loading.innerHTML = "<p style='color:red;'>Ошибка загрузки файлов!</p>";
+        }
+    }
+
+    loadBtnSearchRepeat.addEventListener("click", processFiles);
+
+    // Об. повторов - вертикально
+    const inputFileMergeVert = document.getElementById("inputFileMergeVert");
+    const loadBtnMergeVert = document.querySelector(".load-button-merge-vert");
+    const loadingMergeVert = document.querySelector(".loadingMergeVert");
+    const fileNameInputMVert = document.querySelector("#fileNameMergeVert");
+    const formMergeVert = document.querySelector(".mergeVertical");
+
+    function createMsg(msg) {
+        const msgDiv = document.createElement("div");
+        msgDiv.classList.add("msgDiv");
+        const mesPar = document.createElement("p");
+        mesPar.textContent = msg;
+        msgDiv.appendChild(mesPar);
+        formMergeVert.appendChild(msgDiv);
+    }
+
+    loadBtnMergeVert.addEventListener("click", async () => {
+        const fileName = fileNameInputMVert.value;
+        if (!inputFileMergeVert.files[0]) return;
+
+        loading.innerHTML = "<h2>ОБРАБОТКА ДАННЫХ...</h2>";
+
+        const dataArrFirstFile = await readXlsxFile(inputFileMergeVert.files[0]);
+        const headers = dataArrFirstFile.shift();
+
+        let aggregatedData = new Map();
+        dataArrFirstFile.forEach(row => {
+          const id = row[0];
+          if (!aggregatedData.has(id)) {
+            aggregatedData.set(id, row.slice());
+          } else {
+            let existingRow = aggregatedData.get(id);
+            for (let i = 1; i < row.length; i++) {
+              existingRow[i] = (existingRow[i] || 0) + (row[i] || 0);
+            }
+          }
+        });
+
+        const finalData = [headers, ...Array.from(aggregatedData.values())];
+        await writeXlsxFile(finalData.map(row => row.map(value => ({ value }))), {
+          fileName: `${fileName}.xlsx`,
+        });
+
+        loadingMergeVert.innerHTML = "";
+        fileNameInputMVert.value = "";
+        inputFileMergeVert.value = ""
+    });
+
+    // Об. повторов - вертикально выбранные ячейки
+
+    const inputFileMergeVertC = document.getElementById("inputFileMergeVertC");
+    const inputMergeVertCStart = document.getElementById("inputColSum");
+    const inputMergeVertCEnd = document.getElementById("inputColSumEnd");
+    const loadBtnMergeVertC = document.querySelector(".load-button-merge-vert-c");
+    const loadingMergeVertC = document.querySelector(".loadingMergeVertC");
+    const fileNameInputMergeVertC = document.querySelector("#fileNameMergeVertC");
+    const form = document.querySelector("form");
+
+      let dataArrFirstFile = [];
+      let dataArrSecondFile = [];
+
+      function createMsg(msg) {
+        const msgDiv = document.createElement("div");
+        msgDiv.classList.add("msgDiv");
+        const mesPar = document.createElement("p");
+        mesPar.textContent = msg;
+        msgDiv.appendChild(mesPar);
+        form.appendChild(msgDiv);
+      }
+
+      loadBtnMergeVertC.addEventListener("click", async () => {
+        let flagMsg = 0;
+        const colSum = inputMergeVertCStart.value;
+        const colSumEnd = inputMergeVertCEnd.value;
+        const msgAlertDiv = document.querySelector(".msgDiv");
+        if (msgAlertDiv) {
+          msgAlertDiv.remove();
+        }
+        if (
+          colSum < 2 ||
+          colSumEnd < 2 ||
+          colSumEnd < colSum ||
+          colSum === "" ||
+          colSumEnd === ""
+        ) {
+          createMsg("НЕ КОРРЕКТНО УКАЗАНЫ ГРАНИЦЫ СУММИРОВАНИЯ");
+          flagMsg = 1;
+        }
+        const fileName = fileNameInputMergeVertC.value;
+        if (fileName === "") {
+          if (flagMsg === 0) {
+            createMsg("НЕ УКАЗАННО ИМЯ ФАЙЛА");
+          }
+          return;
+        }
+        if (!inputFileMergeVertC.files[0]) {
+          return;
+        }
+
+        loadingMergeVertC.innerHTML = "<h2>ОБРАБОТКА ДАННЫХ...</h2>";
+        readXlsxFile(inputFileMergeVertC.files[0])
+          .then((rowsData) => {
+            dataArrFirstFile = rowsData;
+            return dataArrFirstFile;
+          })
+          .then((dataArrFirstFile) => {
+            const headRow = dataArrFirstFile.shift();
+            // console.log(headRow);
+            dataArrFirstFile.sort((val1, val2) => {
+              if (val1 < val2) {
+                return -1;
+              }
+              if (val1 > val2) {
+                return 1;
+              }
+              return 0;
+            });
+
+            for (let i = 0; i < dataArrFirstFile.length - 1; i++) {
+              if (dataArrFirstFile[i][0] !== null) {
+                if (dataArrFirstFile[i][0] === dataArrFirstFile[i + 1][0]) {
+                  for (let j = colSum - 1; j < colSumEnd; j++) {
+                    dataArrFirstFile[i][j] =
+                      Number(dataArrFirstFile[i][j]) +
+                      Number(dataArrFirstFile[i + 1][j]);
+                  }
+                  dataArrFirstFile.splice(i + 1, 1);
+                  i--;
+                }
+              }
+            }
+            let readyArr = [];
+
+            dataArrFirstFile.forEach((elem) => {
+              let innerArr = [];
+              elem.forEach((el) => {
+                innerArr.push({ value: el });
+              });
+              readyArr.push(innerArr);
+            });
+            const finalHeadRow = [];
+            headRow.forEach((el) => {
+              finalHeadRow.push({ value: el });
+            });
+            readyArr.unshift(finalHeadRow);
+            return readyArr;
+          })
+          .then(async (readyData) => {
+            // console.log("---->", readyData);
+            await writeXlsxFile(readyData, {
+              fileName: `${fileName}.xlsx`,
+            });
+            loadingMergeVertC.innerHTML = "";
+            fileNameInputMergeVertC.value = "";
+            inputFileMergeVertC.value = "";
+          });
+      });
+
+      // Об. повторов - вертикально выбранные ячейки
+      const inputFileCtr = document.getElementById("inputFileCtrA");
+      const inputCtrStart = document.getElementById("inputColSumCtr");
+      const inputCtrEnd = document.getElementById("inputColSumCtrEnd");
+      const loadBtnCtr = document.querySelector(".load-button-ctr");
+    //   const loading = document.querySelector(".loading");
+      const fileNameInputCtr = document.querySelector("#fileNameCtr");
+      const formCtr = document.querySelector(".ctrAsnalytics");
+
+      let dataArrFirstFileCtr = [];
+      let dataArrSecondFileCtr = [];
+
+      const colSumInput = document.getElementById("inputColSumCtr");
+      const colSumEndInput = document.getElementById("inputColSumCtrEnd");
+      const COL_SUM_KEY = "colSumValue";
+      const COL_SUM_END_KEY = "colSumEndValue";
+
+      // Function to save values to local storage
+      function saveToLocalStorage(key, value) {
+        localStorage.setItem(key, value);
+      }
+
+      // Function to load values from local storage and set them into inputs
+      function loadFromLocalStorage() {
+        const colSumValue = localStorage.getItem(COL_SUM_KEY);
+        const colSumEndValue = localStorage.getItem(COL_SUM_END_KEY);
+
+        if (colSumValue !== null) {
+          colSumInput.value = colSumValue;
+        }
+
+        if (colSumEndValue !== null) {
+          colSumEndInput.value = colSumEndValue;
+        }
+      }
+
+      // Event listeners for input changes to update local storage
+      colSumInput.addEventListener("input", function () {
+        // Ensure the value is not less than 0
+        if (colSumInput.value < 0) {
+          colSumInput.value = 0;
+        }
+
+        // Update local storage
+        saveToLocalStorage(COL_SUM_KEY, colSumInput.value);
+
+        // Ensure colSumEndInput is not smaller than colSumInput
+        if (parseFloat(colSumEndInput.value) < parseFloat(colSumInput.value)) {
+          colSumEndInput.value = colSumInput.value;
+          saveToLocalStorage(COL_SUM_END_KEY, colSumEndInput.value);
+        }
+      });
+
+      colSumEndInput.addEventListener("input", function () {
+        // Ensure the value is not less than 0
+        if (colSumEndInput.value < 0) {
+          colSumEndInput.value = 0;
+        }
+
+        // Update local storage
+        saveToLocalStorage(COL_SUM_END_KEY, colSumEndInput.value);
+
+        // Ensure colSumEndInput is not smaller than colSumInput
+        if (parseFloat(colSumEndInput.value) < parseFloat(colSumInput.value)) {
+          colSumEndInput.value = colSumInput.value;
+          saveToLocalStorage(COL_SUM_END_KEY, colSumEndInput.value);
+        }
+      });
+
+      // Load stored values when the page loads
+      document.addEventListener("DOMContentLoaded", loadFromLocalStorage);
+
+      function getFormattedDate() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+        const day = String(now.getDate()).padStart(2, "0");
+        const hours = String(now.getHours()).padStart(2, "0");
+        const minutes = String(now.getMinutes()).padStart(2, "0");
+        const seconds = String(now.getSeconds()).padStart(2, "0");
+
+        return `${year}-${month}-${day}-${hours}-${minutes}-${seconds}`;
+      }
+
+      function createMsg(msg) {
+        const msgDiv = document.createElement("div");
+        msgDiv.classList.add("msgDiv");
+        const mesPar = document.createElement("p");
+        mesPar.textContent = msg;
+        msgDiv.appendChild(mesPar);
+        formCtr.appendChild(msgDiv);
+      }
+
+      document.getElementById("inputColSum").addEventListener("input", function () {
+        const colSumInput = document.getElementById("inputColSum");
+        const colSumEndInput = document.getElementById("inputColSumEnd");
+
+        // Ensure the value is not less than 0
+        if (colSumInput.value < 0) {
+          colSumInput.value = 0;
+        }
+
+        // Ensure colSumEndInput is not smaller than colSumInput
+        if (parseFloat(colSumEndInput.value) < parseFloat(colSumInput.value)) {
+          colSumEndInput.value = colSumInput.value;
+        }
+      });
+
+      document.getElementById("inputColSumEnd").addEventListener("input", function () {
+        const colSumInput = document.getElementById("inputColSum");
+        const colSumEndInput = document.getElementById("inputColSumEnd");
+
+        // Ensure the value is not less than 0
+        if (colSumEndInput.value < 0) {
+          colSumEndInput.value = 0;
+        }
+
+        // Ensure colSumEndInput is not smaller than colSumInput
+        if (parseFloat(colSumEndInput.value) < parseFloat(colSumInput.value)) {
+          colSumEndInput.value = colSumInput.value;
+        }
+      });
+
+
+      loadBtnCtr.addEventListener("click", async () => {
+        console.log("1111111111")
+        let flagMsg = 0;
+        const colSum = 2;
+        const colSumEnd = 5;
+        const msgAlertDiv = document.querySelector(".msgDiv");
+        if (msgAlertDiv) {
+          msgAlertDiv.remove();
+        }
+        if (
+          colSum < 2 ||
+          colSumEnd < 2 ||
+          colSumEnd < colSum ||
+          colSum === "" ||
+          colSumEnd === ""
+        ) {
+          createMsg("НЕ КОРРЕКТНО УКАЗАНЫ ГРАНИЦЫ СУММИРОВАНИЯ");
+          flagMsg = 1;
+        }
+        const fileName = fileNameInputCtr.value;
+        // if (fileName === "") {
+        //   if (flagMsg === 0) {
+        //     createMsg("НЕ УКАЗАННО ИМЯ ФАЙЛА");
+        //   }
+        //   return;
+        // }
+        if (!inputFileCtr.files[0]) {
+          return;
+        }
+
+        loading.innerHTML = "<h2>ОБРАБОТКА ДАННЫХ...</h2>";
+        readXlsxFile(inputFileCtr.files[0])
+          .then((rowsData) => {
+            dataArrFirstFileCtr = rowsData;
+            return dataArrFirstFileCtr;
+          })
+          .then((dataArrFirstFile) => {
+            const headRow = dataArrFirstFile.shift();
+            // console.log(headRow);
+            dataArrFirstFileCtr.sort((val1, val2) => {
+              if (val1 < val2) {
+                return -1;
+              }
+              if (val1 > val2) {
+                return 1;
+              }
+              return 0;
+            });
+
+            for (let i = 0; i < dataArrFirstFileCtr.length - 1; i++) {
+              if (dataArrFirstFileCtr[i][0] !== null) {
+                if (dataArrFirstFileCtr[i][0] === dataArrFirstFileCtr[i + 1][0]) {
+                  for (let j = colSum - 1; j < colSumEnd; j++) {
+                    dataArrFirstFileCtr[i][j] =
+                      Number(dataArrFirstFileCtr[i][j]) +
+                      Number(dataArrFirstFileCtr[i + 1][j]);
+                  }
+                  dataArrFirstFileCtr.splice(i + 1, 1);
+                  i--;
+                }
+              }
+            }
+            let readyArr = [];
+
+            dataArrFirstFileCtr.forEach((elem) => {
+              let innerArr = [];
+              elem.forEach((el) => {
+                innerArr.push({ value: el });
+              });
+              readyArr.push(innerArr);
+            });
+
+            ////---
+            readyArr.forEach((elem, ind) => {
+                const num = Number(parseFloat(((elem[2].value / elem[1].value) * 100).toFixed(2)));
+                if (inputCtrStart.value && inputCtrEnd.value) {
+                  if (num < inputCtrStart.value) {
+                    elem[3] = {value: num, fontWeight: "bold", backgroundColor: "#ff7c80"};
+                    elem[4] = {value: "Низкий CTR"};
+                  } else if ((num >= inputCtrEnd.value)) {
+                    elem[3] = {value: num, fontWeight: "bold", backgroundColor: "#a9d08e"};
+                    elem[4] = {value: "Высокий CTR"};
+                  } else {
+                    elem[3] = {value: num, fontWeight: "bold"};
+                    elem[4] = {value: ""};
+                  }
+                } else if (inputCtrStart.value) {
+                    if (num < inputCtrStart.value) {
+                      elem[3] = {value: num, fontWeight: "bold", backgroundColor: "#ff7c80"};
+                      elem[4] = {value: "Низкий CTR"};
+                    } else {
+                      elem[3] = {value: num, fontWeight: "bold"};
+                      elem[4] = {value: ""};
+                    }
+                } else if (inputCtrEnd.value) {
+                    if (num >= inputCtrEnd.value) {
+                      elem[3] = {value: num, fontWeight: "bold", backgroundColor: "#a9d08e"};
+                      elem[4] = {value: "Высокий CTR"};
+                    } else {
+                      elem[3] = {value: num, fontWeight: "bold"};
+                      elem[4] = {value: ""};
+                    }
+                } else {
+                  elem[3] = {value: num, fontWeight: "bold"};
+                }
+                
+                if (inputCtrStart.value || inputCtrEnd.value) {
+                  elem.splice(5);
+                } else {
+                  elem.splice(4);
+                }
+                
+            });
+            readyArr.sort((a, b) => b[1].value - a[1].value);
+
+            ////---
+
+            const finalHeadRow = [];
+            headRow.forEach((el, ind) => {
+              if (ind < 4) {
+                finalHeadRow.push({ value: el });
+              } else if ((inputCtrStart.value || inputCtrEnd.value) && ind == 4) {
+                finalHeadRow.push({ value: "Комментарий" });
+              }
+            });
+            readyArr.unshift(finalHeadRow);
+            return readyArr;
+          })
+          .then(async (readyData) => {
+            // console.log("---->", readyData);
+            if(fileName) {
+              await writeXlsxFile(readyData, {
+              fileName: `${fileName}.xlsx`,
+            });
+            } else {
+              await writeXlsxFile(readyData, {
+              fileName: `keywords-${getFormattedDate()}.xlsx`,
+            });
+            }
+            fileNameInputCtr.value = "";
+            // loading.innerHTML = "";
+            inputFileCtr.value = "";          });
+      });
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://unpkg.com/read-excel-file@5.x/bundle/read-excel-file.min.js"></script>
+<script src="https://unpkg.com/write-excel-file@1.x/bundle/write-excel-file.min.js"></script> 
+</body>
+</html>
