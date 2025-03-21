@@ -85,6 +85,13 @@
             color: coral;
         }
 
+        .underline {
+          text-decoration: underline;
+          font-weight: 700;
+          background-color: coral;
+          color: #fff;
+        }
+
         .footer {
             width: 10vw;
             position: absolute;
@@ -207,7 +214,7 @@
     <form class="findRepeat panel ">
         <h2>- ПОИСК ПОВТОРОВ В ФАЙЛАХ EXCEL -</h2>
         <p class="instructions">
-            Сравниваемые значения должны находится во <span class="imp">втором(B)</span> столбце
+            Сравниваемые значения должны находится в <span class="imp underline">первом (A)</span> столбце
             каждого из файлов
           </p>
           <p class="instructions">
@@ -397,6 +404,9 @@
 
         console.log("🚀 Начинаем обработку...");
         const spinner = document.createElement("div");
+        repeatQtt = 0;
+        loading.innerHTML = "";
+        noMatchBtn.style.display = "none";
         spinner.classList.add("spinnerProcess");
         loading.appendChild(spinner);
 
@@ -418,7 +428,7 @@
             console.log("🔎 Начинаем сравнение...");
             for (let i = 0; i < dataArrFirstFile.length; i++) {
                 let row1 = dataArrFirstFile[i];
-                let matchRow = dataArrSecondFile.find(row2 => row2[0] === row1[0]);
+                let matchRow = dataArrSecondFile.find(row2 => String(row2[0]).trim() === String(row1[0]).trim());
 
                 if (matchRow) {
                     row1.push("REPEAT-->");
