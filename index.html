@@ -201,7 +201,7 @@
             100% { transform: rotate(360deg); }
         }
 
-    
+
     </style>
 </head>
 <body>
@@ -216,6 +216,9 @@
         <p class="instructions">
             Сравниваемые значения должны находится в <span class="imp underline">первом (A)</span> столбце
             каждого из файлов
+          </p>
+          <p class="instructions">
+            Данные в <span class="imp underline">первом</span> файле должны начинаться с <span class="imp underline">второй</span> строки, Данные в <span class="imp underline">втором</span> файле должны начинаться с <span class="imp underline">первой</span> строки
           </p>
           <p class="instructions">
             Повторяющиеся позиции будут отображены в первом файле - в столбцах после <span class="imp">"REPEAT-->"</span>
@@ -416,14 +419,13 @@
                 readExcelFile(inputSFSearchRepeat.files[0])
             ]);
 
-
             let header = dataArrFirstFile[0]; // Заголовки
             let resultArr = [];
             let notMatchArr = []; // Заголовки для несовпавших данных
             let repeatQtt = 0;
 
             // Создаём Set из всех значений первого файла для быстрого поиска
-            let firstFileSet = new Set(dataArrFirstFile.slice(1).map(row => row[1]));
+            let firstFileSet = new Set(dataArrFirstFile.slice(1).map(row => String(row[0]).trim()));
 
             console.log("🔎 Начинаем сравнение...");
             for (let i = 0; i < dataArrFirstFile.length; i++) {
@@ -438,13 +440,49 @@
                 resultArr.push(row1);
             }
 
-            // Находим элементы, которых нет в первом файле
-            for (let i = 1; i < dataArrSecondFile.length; i++) {
-                let row2 = dataArrSecondFile[i];
-                if (!firstFileSet.has(row2[0])) {
+            // Находим элементы из dataArrSecondFile, которых нет в dataArrFirstFile
+            for (let row2 of dataArrSecondFile) {
+                if (!firstFileSet.has(String(row2[0]).trim())) {
                     notMatchArr.push(row2);
                 }
-            }
+            } 
+
+            // let header = dataArrFirstFile[0]; // Заголовки
+            // let resultArr = [];
+            // let notMatchArr = []; // Заголовки для несовпавших данных
+            // let repeatQtt = 0;
+
+            // // Создаём Set из всех значений первого файла для быстрого поиска
+            // let firstFileSet = new Set(dataArrFirstFile.slice(1).map(row => row[1]));
+
+            // console.log("🔎 Начинаем сравнение...");
+            // for (let i = 0; i < dataArrFirstFile.length; i++) {
+            //     let row1 = dataArrFirstFile[i];
+            //     let matchRow = dataArrSecondFile.find(row2 => String(row2[0]).trim() === String(row1[0]).trim());
+
+            //     if (matchRow) {
+            //         row1.push("REPEAT-->");
+            //         row1.push(...matchRow);
+            //         repeatQtt++;
+            //     } 
+            //     resultArr.push(row1);
+            // }
+
+            // // Находим элементы, которых нет в первом файле
+            // for (let i = 1; i < dataArrSecondFile.length; i++) {
+            //     let row2 = dataArrSecondFile[i];
+            //     if (!firstFileSet.has(row2[0])) {
+            //         notMatchArr.push(row2);
+            //     }
+            // }
+
+            // // Находим элементы, которых нет в первом файле
+            // for (let i = 1; i < dataArrSecondFile.length; i++) {
+            //     let row2 = dataArrSecondFile[i];
+            //     if (!firstFileSet.has(row2[0])) {
+            //         notMatchArr.push(row2);
+            //     }
+            // }
 
             // console.log("Несовпавшие элементы:", notMatchArr);
             console.log(`✅ Сравнение завершено. Найдено совпадений: ${repeatQtt}`);
